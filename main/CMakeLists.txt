@@ -1,0 +1,30 @@
+idf_component_register(
+    SRCS
+        "main.c"
+        "settings.c"
+        "wifi.c"
+        "dns_captive.c"
+        "webconfig.c"
+        "tailscale.c"
+        "exitnode.c"
+        "peerapi.c"
+        "ntfy.c"
+        "wanip.c"
+        "commands.c"
+    INCLUDE_DIRS "."
+    REQUIRES
+        microlink
+        wireguard_lwip
+        nvs_flash
+        esp_wifi
+        esp_netif
+        esp_event
+        esp_http_server
+        esp_driver_gpio
+        lwip
+        mbedtls
+        json
+        esp_app_format
+        esp_http_client
+        esp-tls
+)

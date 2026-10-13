@@ -1,0 +1,23 @@
+# ESP-IDF build output
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+dependencies.lock
+
+# Release images produced by build.sh -- publish them as release assets, not commits
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Python helpers
+__pycache__/
+*.pyc
+
+# Serial captures
+*.log

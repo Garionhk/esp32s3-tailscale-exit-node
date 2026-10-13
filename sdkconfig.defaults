@@ -1,0 +1,75 @@
+# ESP32-S3 N16R8 Tailscale exit node
+# Starts from MicroLink's examples/basic_connect defaults.
+
+CONFIG_IDF_TARGET="esp32s3"
+
+# ---- Flash / partitions (16 MB) ------------------------------------------
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ---- PSRAM (8 MB octal) -----------------------------------------------------
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+
+# ---- CPU / RTOS -------------------------------------------------------------
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+
+# ---- lwIP -------------------------------------------------------------------
+CONFIG_LWIP_MAX_SOCKETS=32
+CONFIG_LWIP_SO_RCVBUF=y
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+CONFIG_LWIP_TCP_SND_BUF_DEFAULT=32768
+CONFIG_LWIP_TCP_WND_DEFAULT=32768
+# Forwarding + NAPT run on the TCPIP thread now
+CONFIG_LWIP_TCPIP_TASK_STACK_SIZE=6144
+CONFIG_LWIP_IP4_FRAG=y
+CONFIG_LWIP_IP4_REASSEMBLY=y
+
+# Exit node: route tailnet clients' traffic out of the Wi-Fi interface
+CONFIG_LWIP_IP_FORWARD=y
+CONFIG_LWIP_IPV4_NAPT=y
+# CONFIG_LWIP_IPV4_NAPT_PORTMAP is not set
+
+# ---- mbedTLS ----------------------------------------------------------------
+CONFIG_MBEDTLS_CHACHA20_C=y
+CONFIG_MBEDTLS_POLY1305_C=y
+CONFIG_MBEDTLS_CHACHAPOLY_C=y
+CONFIG_MBEDTLS_HKDF_C=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_2=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+# Several TLS connections can be open at once (DERP relay, ntfy stream, ntfy
+# publish, public-IP lookup). With mbedTLS in internal RAM only ~20 KB stayed
+# free at worst, so its allocations go to PSRAM instead.
+# (CONFIG_MBEDTLS_DYNAMIC_BUFFER was tried first: it freed the RAM but the
+# DERP connection then failed with MBEDTLS_ERR_SSL_INVALID_RECORD every few
+# minutes under load. Not used.)
+CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y
+
+# ---- Wi-Fi ------------------------------------------------------------------
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=10
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+CONFIG_ESP_WIFI_AMPDU_TX_ENABLED=n
+CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=n
+
+# ---- HTTP server (setup portal) ---------------------------------------------
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+
+# ---- MicroLink --------------------------------------------------------------
+# Credentials live in NVS and are entered in the setup portal. Nothing
+# user-specific is compiled in, so the binary can be shared.
+CONFIG_ML_WIFI_SSID=""
+CONFIG_ML_WIFI_PASSWORD=""
+CONFIG_ML_TAILSCALE_AUTH_KEY=""
+CONFIG_ML_DEVICE_NAME=""
+# The app runs its own portal on port 80
+# CONFIG_ML_ENABLE_CONFIG_HTTPD is not set
+CONFIG_ML_PRIORITY_PEER_IP=""
+
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
